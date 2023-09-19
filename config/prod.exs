@@ -11,6 +11,7 @@ import Config
 # before starting your production server.
 config :contex_app, ContexAppWeb.Endpoint,
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
+  url: [host: "https://warm-fluffy-copepod.gigalixirapp.com/", port: 443, scheme: "https"],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
 # Configures Swoosh API Client
