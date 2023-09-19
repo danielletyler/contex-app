@@ -12,7 +12,7 @@ config :contex_app,
 
 # Configures the endpoint
 config :contex_app, ContexAppWeb.Endpoint,
-  url: [host: "https://warm-fluffy-copepod.gigalixirapp.com", port: 443],
+  url: [host: "localhost"],
   render_errors: [
     formats: [html: ContexAppWeb.ErrorHTML, json: ContexAppWeb.ErrorJSON],
     layout: false
