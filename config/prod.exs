@@ -14,7 +14,7 @@ config :contex_app, ContexAppWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json",
   http: [port: {:system, "PORT"}],
   url: [host: System.get_env("APP_NAME") <> ".gigalixirapp.com", port: 443],
-  check_origin: ["//autoplacasma.com.br"],
+  check_origin: ["//https://warm-fluffy-copepod.gigalixirapp.com"],
   secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE"),
   server: true
 
