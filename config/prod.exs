@@ -13,7 +13,7 @@ config :contex_app, ContexAppWeb.Endpoint,
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
   cache_static_manifest: "priv/static/cache_manifest.json",
   http: [port: {:system, "PORT"}],
-  url: [host: "warm-fluffy-copepod.gigalixirapp.com", port: 443, scheme: "https"],
+  url: [host: "https://warm-fluffy-copepod.gigalixirapp.com", port: 443],
   secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE"),
   server: true
 

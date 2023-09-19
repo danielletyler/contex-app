@@ -46,7 +46,7 @@ defmodule ContexAppWeb.Questions.EngMeetingLive do
             class="grow"
           />
           <div class="text-center py-2 w-8 border border-2 border-blue-600 rounded-md text-blue-700 font-bold">
-          <%= @stress %>
+            <%= @stress %>
           </div>
         </div>
         <.input
@@ -75,7 +75,12 @@ defmodule ContexAppWeb.Questions.EngMeetingLive do
 
       {String.to_integer(time), String.to_integer(stress)}
     end)
-    |> Helpers.create_point_plot(%{x_min: 0, x_max: 12, y_min: 0, y_max: 10}, "Months Until Meeting", "Stress Level", "Stress vs Time")
+    |> Helpers.create_point_plot(
+      %{x_min: 0, x_max: 12, y_min: 0, y_max: 10},
+      "Months Until Meeting",
+      "Stress Level",
+      "Stress vs Time"
+    )
   end
 
   defp list_months do
