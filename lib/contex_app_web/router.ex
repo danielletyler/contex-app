@@ -21,6 +21,7 @@ defmodule ContexAppWeb.Router do
     live "/tutorial", TutorialLive
     live "/pizza", Questions.PizzaLive
     live "/meeting-stress", Questions.EngMeetingLive
+    live "/meals", Questions.MealsLive
   end
 
   # Other scopes may use custom stacks.
