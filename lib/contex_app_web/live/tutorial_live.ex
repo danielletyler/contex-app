@@ -2,6 +2,7 @@ defmodule ContexAppWeb.TutorialLive do
   use ContexAppWeb, :live_view
 
   def mount(_params, _, socket) do
+    # CONTEX
     games = [
       {"Tic-Tac-Toe", 3.4285714285714284},
       {"Ping Pong", 2.5714285714285716},
@@ -19,7 +20,23 @@ defmodule ContexAppWeb.TutorialLive do
       |> Contex.Plot.axis_labels("games", "stars")
       |> Contex.Plot.to_svg()
 
-    {:ok, assign(socket, plot: plot, chart: chart)}
+    # ECHART
+    option = %{
+      title: %{text: "π", left: "center", top: "center"},
+      series: [
+        %{
+          type: "pie",
+          data: [
+            %{name: "A", value: 20},
+            %{name: "B", value: 50},
+            %{name: "C", value: 100}
+          ],
+          radius: ["40%", "70%"]
+        }
+      ]
+    }
+
+    {:ok, assign(socket, plot: plot, chart: chart, option: option)}
   end
 
   def handle_event("update", _, %{assigns: %{chart: chart}} = socket) do
@@ -47,7 +64,11 @@ defmodule ContexAppWeb.TutorialLive do
 
   def render(assigns) do
     ~H"""
-    <%= @plot %>
+    <%!-- <%= @plot %> --%>
+    <div id="pie" phx-hook="Chart">
+      <div id="pie-chart" style="width: 400px; height: 400px;" />
+      <div id="pie-data" hidden><%= Jason.encode!(@option) %></div>
+    </div>
     <div>
       <button
         phx-click="update"

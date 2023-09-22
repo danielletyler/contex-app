@@ -70,4 +70,19 @@ defmodule ContexAppWeb.Helpers do
     |> Contex.Plot.axis_labels(x_label, y_label)
     |> Contex.Plot.to_svg()
   end
+
+  def create_pie_chart(data) do
+    dataset = Contex.Dataset.new(data, ["Genre", "Count"])
+
+    opts = [
+      mapping: %{category_col: "Genre", value_col: "Count"},
+      colour_palette: ["16a34a", "c13584", "499be4", "FF0000", "00f2ea"],
+      legend_setting: :legend_right,
+      data_labels: true,
+      title: "Pie"
+    ]
+
+    Contex.Plot.new(dataset, Contex.PieChart, 600, 400, opts)
+    |> Contex.Plot.to_svg()
+  end
 end

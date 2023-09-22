@@ -22,6 +22,7 @@ defmodule ContexAppWeb.Router do
     live "/pizza", Questions.PizzaLive
     live "/meeting-stress", Questions.EngMeetingLive
     live "/meals", Questions.MealsLive
+    live "/music", Questions.MusicLive
   end
 
   # Other scopes may use custom stacks.

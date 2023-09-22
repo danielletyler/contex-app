@@ -21,9 +21,25 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import * as echarts from 'echarts';
+
+let Hooks = {}
+Hooks.Chart = {
+  mounted() {
+    selector = "#" + this.el.id
+    this.chart = echarts.init(this.el.querySelector(selector + "-chart"))
+    option = JSON.parse(this.el.querySelector(selector + "-data").textContent)
+    this.chart.setOption(option)
+  },
+  updated() {
+     selector = "#" + this.el.id
+     option = JSON.parse(this.el.querySelector(selector + "-data").textContent)
+     this.chart.setOption(option)
+   }
+}
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}})
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
