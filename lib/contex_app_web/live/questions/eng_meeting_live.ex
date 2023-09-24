@@ -56,7 +56,7 @@ defmodule ContexAppWeb.Questions.EngMeetingLive do
           placeholder="Select a month"
           value={@time}
           phx-change="update-time"
-          options={list_months()}
+          options={list_weeks()}
         />
         <.button class="mt-4 bg-blue-600">Submit</.button>
       </.form>
@@ -76,27 +76,18 @@ defmodule ContexAppWeb.Questions.EngMeetingLive do
       {String.to_integer(time), String.to_integer(stress)}
     end)
     |> Helpers.create_point_plot(
-      %{x_min: 0, x_max: 12, y_min: 0, y_max: 10},
-      "Months Until Meeting",
+      %{x_min: 0, x_max: Enum.count(list_weeks()), y_min: 0, y_max: 10},
+      "Weeks Until Meeting",
       "Stress Level",
       "Stress vs Time"
     )
   end
 
-  defp list_months do
-    [
-      {"September 2023", 0},
-      {"October 2023", 1},
-      {"November 2023", 2},
-      {"December 2023", 3},
-      {"January 2024", 4},
-      {"February 2024", 5},
-      {"March 2024", 6},
-      {"April 2024", 7},
-      {"May 2024", 8},
-      {"June 2024", 9},
-      {"July 2024", 10},
-      {"August 2024", 11}
-    ]
+  defp list_weeks do
+    Date.range(~D[2023-10-18], ~D[2024-08-28], 7)
+    |> Enum.to_list()
+    |> Enum.map(fn x ->
+      Date.to_iso8601(x)
+    end)
   end
 end

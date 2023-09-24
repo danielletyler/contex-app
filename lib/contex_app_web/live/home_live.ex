@@ -9,6 +9,7 @@ defmodule ContexAppWeb.HomeLive do
   def render(assigns) do
     ~H"""
     <div class="flex flex-col gap-4">
+      <a href="/tutorial" class="text-5xl">🗒️</a>
       <a href="/pizza" class="text-5xl">🍕</a>
       <a href="/meeting-stress" class="text-5xl">🤓</a>
       <a href="/meals" class="text-5xl">🍣</a>

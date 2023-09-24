@@ -22,9 +22,10 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import * as echarts from 'echarts';
+import Chart from "chart.js/auto"
 
 let Hooks = {}
-Hooks.Chart = {
+Hooks.EChart = {
   mounted() {
     selector = "#" + this.el.id
     this.chart = echarts.init(this.el.querySelector(selector + "-chart"))
@@ -36,6 +37,35 @@ Hooks.Chart = {
      option = JSON.parse(this.el.querySelector(selector + "-data").textContent)
      this.chart.setOption(option)
    }
+}
+
+Hooks.BarChartJS =  {
+  mounted() {
+    const ctx = this.el;
+    const chart = new Chart(ctx, {});
+    this.handleEvent("new-chart", function(payload){
+      chart.config._config = payload.config
+      chart.update();
+    })
+    this.handleEvent("update-points", function(payload){
+      console.log(chart)
+      chart.data.datasets[0].data = payload.points;
+      chart.data.labels = ['1', '2', '3', '4', '5'];
+      chart.update();
+    })
+  }
+}
+
+Hooks.PieChartJS =  {
+  config() {return JSON.parse(this.el.dataset.config);},
+  mounted() {
+    const ctx = this.el;
+    const chart = new Chart(ctx, this.config());
+    this.handleEvent("update-data", function(payload){
+      chart.data.datasets[0].data = payload.data;
+      chart.update();
+    })
+  },
 }
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")

@@ -3,6 +3,7 @@
         "deploy": "cd .. && mix assets.deploy && rm -f _build/esbuild"
     },
     "dependencies": {
+        "chart.js": "^4.4.0",
         "echarts": "^5.4.3"
     }
 }

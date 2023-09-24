@@ -8,7 +8,14 @@ defmodule ContexAppWeb.Questions.MusicLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: PubSub.subscribe(ContexApp.PubSub, @topic)
-    {:ok, assign(socket, graph: get_chatre_graph(), contex_graph: get_contex_graph(), toggle_graph: false)}
+
+    {:ok,
+     assign(socket,
+       echarts_graph: get_echarts_graph(),
+       contex_graph: get_contex_graph(),
+       chartjs_graph: get_chartjs_graph(),
+       type: "contex"
+     )}
   end
 
   def handle_event("select", %{"genre" => genre}, socket) do
@@ -17,56 +24,83 @@ defmodule ContexAppWeb.Questions.MusicLive do
     {:noreply, socket}
   end
 
-  def handle_event("toggle", _, %{assigns: %{toggle_graph: t}} = socket) do
-    {:noreply, assign(socket, toggle_graph: !t)}
+  def handle_event("change-chart", %{"type" => type}, socket) do
+    {:noreply, assign(socket, type: type)}
   end
 
   def handle_info("new-opinion", socket) do
-    {:noreply, assign(socket, graph: get_chatre_graph(), contex_graph: get_contex_graph())}
+    socket =
+      socket
+      |> assign(echarts_graph: get_echarts_graph())
+      |> assign(contex_graph: get_contex_graph())
+      |> assign(chartjs_graph: get_chartjs_graph())
+      |> push_event("update-data", %{data: get_data()})
+
+    {:noreply, socket}
   end
 
   def render(assigns) do
     ~H"""
     <div>
-    <div class="flex justify-between">
-    <div>
-      Choose your favorite music genre!
-      <div>
-        <button phx-click="select" phx-value-genre="Rock">Rock</button>
-        <button phx-click="select" phx-value-genre="Country">Country</button>
-        <button phx-click="select" phx-value-genre="Pop">Pop</button>
-        <button phx-click="select" phx-value-genre="Jazz">Jazz</button>
-        <button phx-click="select" phx-value-genre="Classical">Classical</button>
+      <div class="flex justify-between">
+        <div>
+          Choose your favorite music genre!
+          <div>
+            <button phx-click="select" phx-value-genre="Rock">Rock</button>
+            <button phx-click="select" phx-value-genre="Country">Country</button>
+            <button phx-click="select" phx-value-genre="Pop">Pop</button>
+            <button phx-click="select" phx-value-genre="Jazz">Jazz</button>
+            <button phx-click="select" phx-value-genre="Classical">Classical</button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <button phx-click="change-chart" phx-value-type="contex">ContEx</button>
+          <button phx-click="change-chart" phx-value-type="echarts">ECharts</button>
+          <button phx-click="change-chart" phx-value-type="chartjs">ChartJS</button>
+        </div>
       </div>
-      </div>
-      <button phx-click="toggle">toggle</button>
-      </div>
-      <div :if={@toggle_graph} id="pie" phx-hook="Chart">
-        <div id="pie-chart" phx-update="ignore" style="width: 700px; height: 700px;" />
-        <div id="pie-data" hidden><%= Jason.encode!(@graph) %></div>
-      </div>
-      <div :if={!@toggle_graph} class="mt-12">
+      <%!-- ContEx --%>
+      <div :if={@type == "contex"}>
         <%= @contex_graph %>
+      </div>
+      <%!-- ECharts --%>
+      <div :if={@type == "echarts"} id="pie" phx-hook="EChart">
+        <div id="pie-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
+        <div id="pie-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
+      </div>
+      <%!-- ChartJS --%>
+      <div class="w-2/3">
+        <canvas
+          :if={@type == "chartjs"}
+          id="my-chart"
+          phx-update="ignore"
+          phx-hook="PieChartJS"
+          data-config={Jason.encode!(@chartjs_graph)}
+        >
+        </canvas>
       </div>
     </div>
     """
   end
 
-  defp get_chatre_graph do
-    {rock, country, pop, jazz, classical} =
-      @topic
-      |> Opinions.get_opinions_by_topic()
-      |> Enum.reduce({0, 0, 0, 0, 0}, fn %{opinion: genre}, acc ->
-        {r, co, p, j, cl} = acc
+  defp get_data do
+    @topic
+    |> Opinions.get_opinions_by_topic()
+    |> Enum.reduce([0, 0, 0, 0, 0], fn %{opinion: genre}, acc ->
+      [r, co, p, j, cl] = acc
 
-        case genre do
-          "Rock" -> {r + 1, co, p, j, cl}
-          "Country" -> {r, co + 1, p, j, cl}
-          "Pop" -> {r, co, p + 1, j, cl}
-          "Jazz" -> {r, co, p, j + 1, cl}
-          "Classical" -> {r, co, p, j, cl + 1}
-        end
-      end)
+      case genre do
+        "Rock" -> [r + 1, co, p, j, cl]
+        "Country" -> [r, co + 1, p, j, cl]
+        "Pop" -> [r, co, p + 1, j, cl]
+        "Jazz" -> [r, co, p, j + 1, cl]
+        "Classical" -> [r, co, p, j, cl + 1]
+      end
+    end)
+  end
+
+  defp get_echarts_graph do
+    [rock, country, pop, jazz, classical] = get_data()
 
     %{
       title: %{text: "Genres", left: "center", top: "center"},
@@ -88,20 +122,7 @@ defmodule ContexAppWeb.Questions.MusicLive do
   end
 
   defp get_contex_graph do
-    {rock, country, pop, jazz, classical} =
-      @topic
-      |> Opinions.get_opinions_by_topic()
-      |> Enum.reduce({0, 0, 0, 0, 0}, fn %{opinion: genre}, acc ->
-        {r, co, p, j, cl} = acc
-
-        case genre do
-          "Rock" -> {r + 1, co, p, j, cl}
-          "Country" -> {r, co + 1, p, j, cl}
-          "Pop" -> {r, co, p + 1, j, cl}
-          "Jazz" -> {r, co, p, j + 1, cl}
-          "Classical" -> {r, co, p, j, cl + 1}
-        end
-      end)
+    [rock, country, pop, jazz, classical] = get_data()
 
     data = [
       ["Rock", rock],
@@ -111,6 +132,42 @@ defmodule ContexAppWeb.Questions.MusicLive do
       ["Classical", classical]
     ]
 
-    Helpers.create_pie_chart(data)
+    opts = [
+      mapping: %{category_col: "Genre", value_col: "Count"},
+      # colour_palette: ["D0CFEC", "07BEB8", "F15156", "274C77", "EDBF85"],
+      legend_setting: :legend_right,
+      data_labels: true,
+      title: "Favorite Music Genre"
+    ]
+
+    Helpers.create_pie_chart(data, ["Genre", "Count"], opts)
+  end
+
+  defp get_chartjs_graph do
+    [rock, country, pop, jazz, classical] = get_data()
+
+    %{
+      type: "pie",
+      data: %{
+        labels: ["Rock", "Country", "Pop", "Jazz", "Classical"],
+        datasets: [
+          %{
+            data: [rock, country, pop, jazz, classical]
+          }
+        ]
+      },
+      options: %{
+        responsive: true,
+        plugins: %{
+          legend: %{
+            position: "top"
+          },
+          title: %{
+            display: true,
+            text: "Favorite Genres"
+          }
+        }
+      }
+    }
   end
 end

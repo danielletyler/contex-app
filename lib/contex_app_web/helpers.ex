@@ -62,27 +62,33 @@ defmodule ContexAppWeb.Helpers do
 
     data
     |> Contex.Dataset.new()
-    |> Contex.Plot.new(Contex.PointPlot, 500, 400,
-      custom_x_scale: x_scale,
-      custom_y_scale: y_scale
-    )
+    |> Contex.Plot.new(Contex.PointPlot, 500, 400, [
+      custom_y_scale: y_scale,
+      custom_x_scale: x_scale
+    ])
     |> Contex.Plot.titles(title, subtitle)
     |> Contex.Plot.axis_labels(x_label, y_label)
     |> Contex.Plot.to_svg()
   end
 
-  def create_pie_chart(data) do
-    dataset = Contex.Dataset.new(data, ["Genre", "Count"])
+  def create_pie_chart(data, mapping, opts \\ [])
 
-    opts = [
-      mapping: %{category_col: "Genre", value_col: "Count"},
-      colour_palette: ["16a34a", "c13584", "499be4", "FF0000", "00f2ea"],
-      legend_setting: :legend_right,
-      data_labels: true,
-      title: "Pie"
-    ]
+  def create_pie_chart(
+        [["Rock", 0], ["Country", 0], ["Pop", 0], ["Jazz", 0], ["Classical", 0]],
+        mapping,
+        opts
+      ) do
+    data = [["Rock", 1], ["Country", 1], ["Pop", 1], ["Jazz", 1], ["Classical", 1]]
+    dataset = Contex.Dataset.new(data, mapping)
 
     Contex.Plot.new(dataset, Contex.PieChart, 600, 400, opts)
+    |> Contex.Plot.to_svg()
+  end
+
+  def create_pie_chart(data, mapping, opts) do
+    data
+    |> Contex.Dataset.new(mapping)
+    |> Contex.Plot.new(Contex.PieChart, 600, 400, opts)
     |> Contex.Plot.to_svg()
   end
 end
