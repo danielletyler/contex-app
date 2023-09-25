@@ -8,7 +8,7 @@ defmodule ContexAppWeb.Questions.MealsLive do
 
   def mount(_params, _, socket) do
     if connected?(socket), do: PubSub.subscribe(ContexApp.PubSub, @topic)
-    {:ok, assign(socket, breakfast: 1, lunch: 2, dinner: 3, graph: get_graph())}
+    {:ok, assign(socket, breakfast: 1, lunch: 2, dinner: 3, graph: get_graph(), echarts_graph: get_echarts_graph())}
   end
 
   def handle_event("update-vote", %{"breakfast" => breakfast}, socket) do
@@ -34,7 +34,7 @@ defmodule ContexAppWeb.Questions.MealsLive do
   end
 
   def handle_info("new-opinion", socket) do
-    {:noreply, assign(socket, graph: get_graph())}
+    {:noreply, assign(socket, graph: get_graph(), echarts_graph: get_echarts_graph())}
   end
 
   def render(assigns) do
@@ -78,34 +78,41 @@ defmodule ContexAppWeb.Questions.MealsLive do
           <.button>Submit</.button>
         </.form>
       </div>
-      <%= @graph %>
+      <%!-- <%= @graph %> --%>
+      <%!-- ECharts --%>
+      <div id="stack" phx-hook="EChart">
+        <div id="stack-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
+        <div id="stack-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
+      </div>
     </div>
     """
   end
 
+  defp get_data do
+    @topic
+    |> Opinions.get_opinions_by_topic()
+    |> Enum.reduce(
+      {
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+      },
+      fn x, acc ->
+        {b, l, d} = acc
+
+        [breakfast, lunch, dinner] = String.split(x.opinion, ":")
+
+        b = List.update_at(b, String.to_integer(breakfast) - 1, &(&1 + 1))
+        l = List.update_at(l, String.to_integer(lunch) - 1, &(&1 + 1))
+        d = List.update_at(d, String.to_integer(dinner) - 1, &(&1 + 1))
+
+        {b, l, d}
+      end
+    )
+  end
+
   defp get_graph do
-    {breakfast, lunch, dinner} =
-      @topic
-      |> Opinions.get_opinions_by_topic()
-      |> Enum.reduce(
-        {
-          [0, 0, 0],
-          [0, 0, 0],
-          [0, 0, 0]
-        },
-        fn x, acc ->
-          {b, l, d} = acc
-
-          [breakfast, lunch, dinner] = String.split(x.opinion, ":")
-
-          b = List.update_at(b, String.to_integer(breakfast) - 1, &(&1 + 1))
-          l = List.update_at(l, String.to_integer(lunch) - 1, &(&1 + 1))
-          d = List.update_at(d, String.to_integer(dinner) - 1, &(&1 + 1))
-
-          {b, l, d}
-        end
-      )
-      |> IO.inspect()
+    {breakfast, lunch, dinner} = get_data()
 
     Helpers.create_stacked_bar_graph(
       [
@@ -115,5 +122,70 @@ defmodule ContexAppWeb.Questions.MealsLive do
       ],
       "Meals"
     )
+  end
+
+  defp get_echarts_graph do
+    {breakfast, lunch, dinner} = get_data()
+
+    %{
+      tooltip: %{
+        trigger: "axis",
+        axisPointer: %{
+          type: "shadow"
+        }
+      },
+      legend: %{},
+      grid: %{
+        left: "3%",
+        right: "4%",
+        bottom: "3%",
+        containLabel: true
+      },
+      yAxis: %{
+        type: "value"
+      },
+      xAxis: %{
+        type: "category",
+        data: ["Most", "Kinda", "Least"]
+      },
+      series: [
+        %{
+          name: "Breakfast",
+          type: "bar",
+          stack: "total",
+          label: %{
+            show: true
+          },
+          emphasis: %{
+            focus: "series"
+          },
+          data: breakfast
+        },
+        %{
+          name: "Lunch",
+          type: "bar",
+          stack: "total",
+          label: %{
+            show: true
+          },
+          emphasis: %{
+            focus: "series"
+          },
+          data: lunch
+        },
+        %{
+          name: "Dinner",
+          type: "bar",
+          stack: "total",
+          label: %{
+            show: true
+          },
+          emphasis: %{
+            focus: "series"
+          },
+          data: dinner
+        }
+      ]
+    };
   end
 end

@@ -13,7 +13,6 @@ defmodule ContexAppWeb.Questions.MusicLive do
      assign(socket,
        echarts_graph: get_echarts_graph(),
        contex_graph: get_contex_graph(),
-       chartjs_graph: get_chartjs_graph(),
        type: "contex"
      )}
   end
@@ -33,8 +32,6 @@ defmodule ContexAppWeb.Questions.MusicLive do
       socket
       |> assign(echarts_graph: get_echarts_graph())
       |> assign(contex_graph: get_contex_graph())
-      |> assign(chartjs_graph: get_chartjs_graph())
-      |> push_event("update-data", %{data: get_data()})
 
     {:noreply, socket}
   end
@@ -56,7 +53,6 @@ defmodule ContexAppWeb.Questions.MusicLive do
         <div class="flex flex-col gap-2">
           <button phx-click="change-chart" phx-value-type="contex">ContEx</button>
           <button phx-click="change-chart" phx-value-type="echarts">ECharts</button>
-          <button phx-click="change-chart" phx-value-type="chartjs">ChartJS</button>
         </div>
       </div>
       <%!-- ContEx --%>
@@ -67,17 +63,6 @@ defmodule ContexAppWeb.Questions.MusicLive do
       <div :if={@type == "echarts"} id="pie" phx-hook="EChart">
         <div id="pie-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
         <div id="pie-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
-      </div>
-      <%!-- ChartJS --%>
-      <div class="w-2/3">
-        <canvas
-          :if={@type == "chartjs"}
-          id="my-chart"
-          phx-update="ignore"
-          phx-hook="PieChartJS"
-          data-config={Jason.encode!(@chartjs_graph)}
-        >
-        </canvas>
       </div>
     </div>
     """
@@ -125,11 +110,11 @@ defmodule ContexAppWeb.Questions.MusicLive do
     [rock, country, pop, jazz, classical] = get_data()
 
     data = [
-      ["Rock", rock],
-      ["Country", country],
-      ["Pop", pop],
-      ["Jazz", jazz],
-      ["Classical", classical]
+      {"Rock", rock},
+      {"Country", country},
+      {"Pop", pop},
+      {"Jazz", jazz},
+      {"Classical", classical}
     ]
 
     opts = [
@@ -141,33 +126,5 @@ defmodule ContexAppWeb.Questions.MusicLive do
     ]
 
     Helpers.create_pie_chart(data, ["Genre", "Count"], opts)
-  end
-
-  defp get_chartjs_graph do
-    [rock, country, pop, jazz, classical] = get_data()
-
-    %{
-      type: "pie",
-      data: %{
-        labels: ["Rock", "Country", "Pop", "Jazz", "Classical"],
-        datasets: [
-          %{
-            data: [rock, country, pop, jazz, classical]
-          }
-        ]
-      },
-      options: %{
-        responsive: true,
-        plugins: %{
-          legend: %{
-            position: "top"
-          },
-          title: %{
-            display: true,
-            text: "Favorite Genres"
-          }
-        }
-      }
-    }
   end
 end

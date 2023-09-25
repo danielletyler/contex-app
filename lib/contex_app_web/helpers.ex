@@ -62,10 +62,10 @@ defmodule ContexAppWeb.Helpers do
 
     data
     |> Contex.Dataset.new()
-    |> Contex.Plot.new(Contex.PointPlot, 500, 400, [
+    |> Contex.Plot.new(Contex.PointPlot, 500, 400,
       custom_y_scale: y_scale,
       custom_x_scale: x_scale
-    ])
+    )
     |> Contex.Plot.titles(title, subtitle)
     |> Contex.Plot.axis_labels(x_label, y_label)
     |> Contex.Plot.to_svg()
