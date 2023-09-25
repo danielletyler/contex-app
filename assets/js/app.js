@@ -39,35 +39,6 @@ Hooks.EChart = {
    }
 }
 
-Hooks.BarChartJS =  {
-  mounted() {
-    const ctx = this.el;
-    const chart = new Chart(ctx, {});
-    this.handleEvent("new-chart", function(payload){
-      chart.config._config = payload.config
-      chart.update();
-    })
-    this.handleEvent("update-points", function(payload){
-      console.log(chart)
-      chart.data.datasets[0].data = payload.points;
-      chart.data.labels = ['1', '2', '3', '4', '5'];
-      chart.update();
-    })
-  }
-}
-
-Hooks.PieChartJS =  {
-  config() {return JSON.parse(this.el.dataset.config);},
-  mounted() {
-    const ctx = this.el;
-    const chart = new Chart(ctx, this.config());
-    this.handleEvent("update-data", function(payload){
-      chart.data.datasets[0].data = payload.data;
-      chart.update();
-    })
-  },
-}
-
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}})
 

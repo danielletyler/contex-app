@@ -8,7 +8,11 @@ defmodule ContexAppWeb.Questions.MealsLive do
 
   def mount(_params, _, socket) do
     if connected?(socket), do: PubSub.subscribe(ContexApp.PubSub, @topic)
-    {:ok, assign(socket, breakfast: 1, lunch: 2, dinner: 3, graph: get_graph(), echarts_graph: get_echarts_graph())}
+    {:ok, assign(socket, breakfast: 1, lunch: 2, dinner: 3, graph: get_graph(), echarts_graph: get_echarts_graph(), toggle: true)}
+  end
+
+  def handle_event("toggle", _, %{assigns: %{toggle: t}} = socket) do
+    {:noreply, assign(socket, toggle: !t)}
   end
 
   def handle_event("update-vote", %{"breakfast" => breakfast}, socket) do
@@ -78,9 +82,12 @@ defmodule ContexAppWeb.Questions.MealsLive do
           <.button>Submit</.button>
         </.form>
       </div>
-      <%!-- <%= @graph %> --%>
+      <button phx-click="toggle">Toggle chart</button>
+      <div :if={@toggle}>
+        <%= @graph %>
+      </div>
       <%!-- ECharts --%>
-      <div id="stack" phx-hook="EChart">
+      <div id="stack" phx-hook="EChart" if={!@toggle}>
         <div id="stack-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
         <div id="stack-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
       </div>

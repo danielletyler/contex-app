@@ -74,7 +74,7 @@ defmodule ContexAppWeb.Helpers do
   def create_pie_chart(data, mapping, opts \\ [])
 
   def create_pie_chart(
-        [["Rock", 0], ["Country", 0], ["Pop", 0], ["Jazz", 0], ["Classical", 0]],
+        [{"Rock", 0}, {"Country", 0}, {"Pop", 0}, {"Jazz", 0}, {"Classical", 0}],
         mapping,
         opts
       ) do
