@@ -8,7 +8,16 @@ defmodule ContexAppWeb.Questions.MealsLive do
 
   def mount(_params, _, socket) do
     if connected?(socket), do: PubSub.subscribe(ContexApp.PubSub, @topic)
-    {:ok, assign(socket, breakfast: 1, lunch: 2, dinner: 3, graph: get_graph(), echarts_graph: get_echarts_graph(), toggle: true)}
+
+    {:ok,
+     assign(socket,
+       breakfast: 1,
+       lunch: 2,
+       dinner: 3,
+       graph: get_graph(),
+       echarts_graph: get_echarts_graph(),
+       toggle: true
+     )}
   end
 
   def handle_event("toggle", _, %{assigns: %{toggle: t}} = socket) do
@@ -44,13 +53,14 @@ defmodule ContexAppWeb.Questions.MealsLive do
   def render(assigns) do
     ~H"""
     <div>
-      <h1 class="mb-12">
-        Most important meal of the day?? Rank the three meals from most (1) to least (3) important
-      </h1>
+      <h3>
+        Most important meal of the day??
+      </h3>
+      <h5>Rank the three meals from most (1) to least (3) important</h5>
       <div>
-        <.form for={%{}} phx-submit="submit" class="flex gap-4">
+        <.form for={%{}} phx-submit="submit" class="flex gap-4 py-8 mb-2 border-b border-zinc-100">
           <div>
-            breakfast
+            Breakfast
             <.input
               phx-change="update-vote"
               name="breakfast"
@@ -60,7 +70,7 @@ defmodule ContexAppWeb.Questions.MealsLive do
             />
           </div>
           <div>
-            lunch
+            Lunch
             <.input
               phx-change="update-vote"
               name="lunch"
@@ -70,7 +80,7 @@ defmodule ContexAppWeb.Questions.MealsLive do
             />
           </div>
           <div>
-            dinner
+            Dinner
             <.input
               phx-change="update-vote"
               name="dinner"
@@ -79,16 +89,16 @@ defmodule ContexAppWeb.Questions.MealsLive do
               options={[1, 2, 3]}
             />
           </div>
-          <.button>Submit</.button>
+          <.button class="h-max m-2 self-end">Submit</.button>
         </.form>
       </div>
-      <button phx-click="toggle">Toggle chart</button>
+      <h5 phx-click="toggle" class="cursor-pointer hover:underline">Toggle chart</h5>
       <div :if={@toggle}>
         <%= @graph %>
       </div>
       <%!-- ECharts --%>
-      <div id="stack" phx-hook="EChart" if={!@toggle}>
-        <div id="stack-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
+      <div :if={!@toggle} id="stack" phx-hook="EChart">
+        <div id="stack-chart" phx-update="ignore" style="width: 600px; height: 500px;" />
         <div id="stack-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
       </div>
     </div>
@@ -193,6 +203,6 @@ defmodule ContexAppWeb.Questions.MealsLive do
           data: dinner
         }
       ]
-    };
+    }
   end
 end

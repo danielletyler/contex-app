@@ -13,7 +13,7 @@ defmodule ContexAppWeb.Questions.MusicLive do
      assign(socket,
        echarts_graph: get_echarts_graph(),
        contex_graph: get_contex_graph(),
-       type: "contex"
+       toggle: true
      )}
   end
 
@@ -23,8 +23,8 @@ defmodule ContexAppWeb.Questions.MusicLive do
     {:noreply, socket}
   end
 
-  def handle_event("change-chart", %{"type" => type}, socket) do
-    {:noreply, assign(socket, type: type)}
+  def handle_event("toggle", _, %{assigns: %{toggle: t}} = socket) do
+    {:noreply, assign(socket, toggle: !t)}
   end
 
   def handle_info("new-opinion", socket) do
@@ -39,30 +39,30 @@ defmodule ContexAppWeb.Questions.MusicLive do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="flex justify-between">
-        <div>
-          Choose your favorite music genre!
-          <div>
+        <div class="border-b border-zinc-100 mb-2">
+          <h3>
+            Choose your favorite music genre!
+          </h3>
+          <h5>(Out of this very niche and exclusive selection)</h5>
+          <div class="my-8">
             <button phx-click="select" phx-value-genre="Rock">Rock</button>
             <button phx-click="select" phx-value-genre="Country">Country</button>
             <button phx-click="select" phx-value-genre="Pop">Pop</button>
+            <button phx-click="select" phx-value-genre="Hip-hop">Hip-hop</button>
             <button phx-click="select" phx-value-genre="Jazz">Jazz</button>
-            <button phx-click="select" phx-value-genre="Classical">Classical</button>
           </div>
         </div>
-        <div class="flex flex-col gap-2">
-          <button phx-click="change-chart" phx-value-type="contex">ContEx</button>
-          <button phx-click="change-chart" phx-value-type="echarts">ECharts</button>
-        </div>
-      </div>
+        <h5 phx-click="toggle" class="cursor-pointer hover:underline">Toggle chart</h5>
+        <div class="mt-12">
       <%!-- ContEx --%>
-      <div :if={@type == "contex"}>
+      <div :if={@toggle}>
         <%= @contex_graph %>
       </div>
       <%!-- ECharts --%>
-      <div :if={@type == "echarts"} id="pie" phx-hook="EChart">
+      <div :if={!@toggle} id="pie" phx-hook="EChart">
         <div id="pie-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
         <div id="pie-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
+      </div>
       </div>
     </div>
     """

@@ -7,6 +7,12 @@
     button {
       @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded;
     }
+    h3 {
+      @apply font-bold text-xl tracking-wide;
+    }
+    h5 {
+      @apply tracking-wide font-medium
+    }
   }
 
   /* Contex CSS */
@@ -29,11 +35,6 @@
 /* Styling for grid line */
 .exc-grid {
   stroke: lightgrey;
-}
-
-/* Styling for outline of colours in legend */
-.exc-legend {
-  
 }
 
 /* Styling for text of colours in legend */

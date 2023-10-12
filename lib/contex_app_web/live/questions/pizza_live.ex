@@ -28,27 +28,29 @@ defmodule ContexAppWeb.Questions.PizzaLive do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="flex justify-between">
+      <div class="flex gap-8 mb-4 pb-8 items-end border-b border-zinc-100">
         <h3>Does Pineapple Belong on Pizza?</h3>
-        <button phx-click="toggle">Toggle chart</button>
+        <div class="flex gap-4">
+          <button
+            class="bg-green-500 hover:bg-green-700"
+            phx-click="add-opinion"
+            phx-value-opinion="Yes"
+          >
+            YES
+          </button>
+          <button class="bg-red-500 hover:bg-red-700" phx-click="add-opinion" phx-value-opinion="No">
+            NO
+          </button>
+        </div>
       </div>
+      <h5 phx-click="toggle" class="cursor-pointer hover:underline mb-12">Toggle chart</h5>
       <div>
-        <button
-          class="bg-green-500 hover:bg-green-700"
-          phx-click="add-opinion"
-          phx-value-opinion="Yes"
-        >
-          YES
-        </button>
-        <button class="bg-red-500 hover:bg-red-700" phx-click="add-opinion" phx-value-opinion="No">
-          NO
-        </button>
         <div :if={@toggle}>
           <%= @graph %>
         </div>
         <%!-- ECharts --%>
-        <div id="bar" phx-hook="EChart" :if={!@toggle} class="m-8">
-          <div id="bar-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
+        <div :if={!@toggle} id="bar" phx-hook="EChart" class="m-8">
+          <div id="bar-chart" phx-update="ignore" style="width: 600px; height: 500px;" />
           <div id="bar-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
         </div>
       </div>
@@ -57,16 +59,16 @@ defmodule ContexAppWeb.Questions.PizzaLive do
   end
 
   defp get_data do
-      @topic
-      |> Opinions.get_opinions_by_topic()
-      |> Enum.reduce({0, 0}, fn x, acc ->
-        {yes, no} = acc
+    @topic
+    |> Opinions.get_opinions_by_topic()
+    |> Enum.reduce({0, 0}, fn x, acc ->
+      {yes, no} = acc
 
-        case x.opinion do
-          "Yes" -> {yes + 1, no}
-          _ -> {yes, no + 1}
-        end
-      end)
+      case x.opinion do
+        "Yes" -> {yes + 1, no}
+        _ -> {yes, no + 1}
+      end
+    end)
   end
 
   defp get_graph do

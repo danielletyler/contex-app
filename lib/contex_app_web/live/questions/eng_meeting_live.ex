@@ -8,7 +8,15 @@ defmodule ContexAppWeb.Questions.EngMeetingLive do
 
   def mount(_params, _, socket) do
     if connected?(socket), do: PubSub.subscribe(ContexApp.PubSub, @topic)
-    {:ok, assign(socket, stress: 0, time: 0, graph: get_graph(), echarts_graph: get_echarts_graph(), toggle: true)}
+
+    {:ok,
+     assign(socket,
+       stress: 0,
+       time: 0,
+       graph: get_graph(),
+       echarts_graph: get_echarts_graph(),
+       toggle: true
+     )}
   end
 
   def handle_event("toggle", _, %{assigns: %{toggle: t}} = socket) do
@@ -36,42 +44,47 @@ defmodule ContexAppWeb.Questions.EngMeetingLive do
   def render(assigns) do
     ~H"""
     <div>
-      <.form for={%{}} phx-submit="submit">
-        <div class="flex w-full items-end gap-8 mb-8">
-          <.input
-            label="How stressed are you about your engineering meeting?"
-            name="stress"
-            type="range"
-            value={@stress}
-            phx-change="update-stress"
-            min="0"
-            max="10"
-            step="1"
-            class="grow"
-          />
-          <div class="text-center py-2 w-8 border border-2 border-blue-600 rounded-md text-blue-700 font-bold">
-            <%= @stress %>
+      <.form for={%{}} phx-submit="submit" class="border-b border-zinc-100 mb-4">
+        <div class="flex justify-between divide-x mb-4">
+          <div class="flex gap-2 items-end pr-8">
+            <.input
+              label="How stressed are you about your engineering meeting?"
+              name="stress"
+              type="range"
+              value={@stress}
+              phx-change="update-stress"
+              min="0"
+              max="10"
+              step="1"
+            />
+            <div class="text-blue-700 ">
+              <%= @stress %>
+            </div>
           </div>
+          <div class="pl-8">
+            <.input
+              label="When is your meeting scheduled for?"
+              name="time"
+              type="select"
+              placeholder="Select a month"
+              value={@time}
+              phx-change="update-time"
+              options={list_weeks()}
+            />
+          </div>
+          <.button class="h-max self-end my-2 ml-4">Submit</.button>
         </div>
-        <.input
-          label="When is your meeting scheduled for?"
-          name="time"
-          type="select"
-          placeholder="Select a month"
-          value={@time}
-          phx-change="update-time"
-          options={list_weeks()}
-        />
-        <.button class="mt-4 bg-blue-600">Submit</.button>
       </.form>
-      <button phx-click="toggle">Toggle chart</button>
-      <div :if={@toggle}>
-        <%= @graph %>
-      </div>
-      <%!-- ECharts --%>
-      <div id="point" phx-hook="EChart" :if={!@toggle}>
-        <div id="point-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
-        <div id="point-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
+      <h5 phx-click="toggle" class="cursor-pointer hover:underline">Toggle chart</h5>
+      <div class="mt-12">
+        <div :if={@toggle}>
+          <%= @graph %>
+        </div>
+        <%!-- ECharts --%>
+        <div :if={!@toggle} id="point" phx-hook="EChart">
+          <div id="point-chart" phx-update="ignore" style="width: 700px; height: 500px;" />
+          <div id="point-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
+        </div>
       </div>
     </div>
     """
