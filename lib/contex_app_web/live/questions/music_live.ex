@@ -13,11 +13,16 @@ defmodule ContexAppWeb.Questions.MusicLive do
      assign(socket,
        echarts_graph: get_echarts_graph(),
        contex_graph: get_contex_graph(),
-       toggle: true
+       toggle: true,
+       genre: nil
      )}
   end
 
   def handle_event("select", %{"genre" => genre}, socket) do
+    {:noreply, assign(socket, genre: genre)}
+  end
+
+  def handle_event("submit", %{"genre" => genre}, socket) do
     Opinions.create_opinion(%{topic: @topic, opinion: genre})
     PubSub.broadcast(ContexApp.PubSub, @topic, "new-opinion")
     {:noreply, socket}
@@ -39,30 +44,37 @@ defmodule ContexAppWeb.Questions.MusicLive do
   def render(assigns) do
     ~H"""
     <div>
-        <div class="border-b border-zinc-100 mb-2">
+      <div class="flex border-b border-zinc-100 gap-8 pb-8 mb-2">
+        <div>
           <h3>
             Choose your favorite music genre!
           </h3>
           <h5>(Out of this very niche and exclusive selection)</h5>
-          <div class="my-8">
-            <button phx-click="select" phx-value-genre="Rock">Rock</button>
-            <button phx-click="select" phx-value-genre="Country">Country</button>
-            <button phx-click="select" phx-value-genre="Pop">Pop</button>
-            <button phx-click="select" phx-value-genre="Hip-hop">Hip-hop</button>
-            <button phx-click="select" phx-value-genre="Jazz">Jazz</button>
-          </div>
         </div>
-        <h5 phx-click="toggle" class="cursor-pointer hover:underline">Toggle chart</h5>
-        <div class="mt-12">
-      <%!-- ContEx --%>
-      <div :if={@toggle}>
-        <%= @contex_graph %>
+        <.form for={%{}} phx-submit="submit" class="flex gap-4">
+          <.input
+            label=""
+            name="genre"
+            type="select"
+            placeholder="Select a genre"
+            value={@genre}
+            phx-change="select"
+            options={["Rock", "Country", "Pop", "Hip-hop", "Jazz"]}
+          />
+          <.button class="h-max my-2">Submit</.button>
+        </.form>
       </div>
-      <%!-- ECharts --%>
-      <div :if={!@toggle} id="pie" phx-hook="EChart">
-        <div id="pie-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
-        <div id="pie-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
-      </div>
+      <h5 phx-click="toggle" class="cursor-pointer hover:underline">Toggle chart</h5>
+      <div class="mt-12">
+        <%!-- ContEx --%>
+        <div :if={@toggle}>
+          <%= @contex_graph %>
+        </div>
+        <%!-- ECharts --%>
+        <div :if={!@toggle} id="pie" phx-hook="EChart">
+          <div id="pie-chart" phx-update="ignore" style="width: 500px; height: 400px;" />
+          <div id="pie-data" hidden><%= Jason.encode!(@echarts_graph) %></div>
+        </div>
       </div>
     </div>
     """
@@ -72,20 +84,20 @@ defmodule ContexAppWeb.Questions.MusicLive do
     @topic
     |> Opinions.get_opinions_by_topic()
     |> Enum.reduce([0, 0, 0, 0, 0], fn %{opinion: genre}, acc ->
-      [r, co, p, j, cl] = acc
+      [r, co, p, j, hh] = acc
 
       case genre do
-        "Rock" -> [r + 1, co, p, j, cl]
-        "Country" -> [r, co + 1, p, j, cl]
-        "Pop" -> [r, co, p + 1, j, cl]
-        "Jazz" -> [r, co, p, j + 1, cl]
-        "Classical" -> [r, co, p, j, cl + 1]
+        "Rock" -> [r + 1, co, p, j, hh]
+        "Country" -> [r, co + 1, p, j, hh]
+        "Pop" -> [r, co, p + 1, j, hh]
+        "Jazz" -> [r, co, p, j + 1, hh]
+        "Hip-hop" -> [r, co, p, j, hh + 1]
       end
     end)
   end
 
   defp get_echarts_graph do
-    [rock, country, pop, jazz, classical] = get_data()
+    [rock, country, pop, jazz, hh] = get_data()
 
     %{
       title: %{text: "Genres", left: "center", top: "center"},
@@ -98,7 +110,7 @@ defmodule ContexAppWeb.Questions.MusicLive do
             %{name: "Country", value: country},
             %{name: "Pop", value: pop},
             %{name: "Jazz", value: jazz},
-            %{name: "Classical", value: classical}
+            %{name: "Hip-hop", value: hh}
           ],
           radius: ["40%", "70%"]
         }
@@ -107,14 +119,14 @@ defmodule ContexAppWeb.Questions.MusicLive do
   end
 
   defp get_contex_graph do
-    [rock, country, pop, jazz, classical] = get_data()
+    [rock, country, pop, jazz, hh] = get_data()
 
     data = [
       {"Rock", rock},
       {"Country", country},
       {"Pop", pop},
       {"Jazz", jazz},
-      {"Classical", classical}
+      {"Hip-hop", hh}
     ]
 
     opts = [

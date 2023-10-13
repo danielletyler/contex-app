@@ -74,11 +74,11 @@ defmodule ContexAppWeb.Helpers do
   def create_pie_chart(data, mapping, opts \\ [])
 
   def create_pie_chart(
-        [{"Rock", 0}, {"Country", 0}, {"Pop", 0}, {"Jazz", 0}, {"Classical", 0}],
+        [{"Rock", 0}, {"Country", 0}, {"Pop", 0}, {"Jazz", 0}, {"Hip-hop", 0}],
         mapping,
         opts
       ) do
-    data = [["Rock", 1], ["Country", 1], ["Pop", 1], ["Jazz", 1], ["Classical", 1]]
+    data = [["Rock", 1], ["Country", 1], ["Pop", 1], ["Jazz", 1], ["Hip-hop", 1]]
     dataset = Contex.Dataset.new(data, mapping)
 
     Contex.Plot.new(dataset, Contex.PieChart, 600, 400, opts)
