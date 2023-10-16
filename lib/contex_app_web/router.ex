@@ -17,8 +17,7 @@ defmodule ContexAppWeb.Router do
   scope "/", ContexAppWeb do
     pipe_through :browser
 
-    live "/", HomeLive
-    live "/tutorial", TutorialLive
+    live "/", TutorialLive
     live "/pizza", Questions.PizzaLive
     live "/meeting-stress", Questions.EngMeetingLive
     live "/meals", Questions.MealsLive
