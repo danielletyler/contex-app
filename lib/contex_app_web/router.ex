@@ -18,9 +18,10 @@ defmodule ContexAppWeb.Router do
     pipe_through :browser
 
     live "/", TutorialLive
+    live "/demo", DemoLive
     live "/pizza", Questions.PizzaLive
     live "/meeting-stress", Questions.EngMeetingLive
-    live "/meals", Questions.MealsLive
+    live "/powers", Questions.PowersLive
     live "/music", Questions.MusicLive
   end
 
